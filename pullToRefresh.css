@@ -1,0 +1,35 @@
+.pullToRefresh {
+    position:absolute;
+    left:0;
+    right:0;
+    top:-60px;
+    margin:auto;
+    width: 50px;
+    height: 50px;
+}
+.backTranTop
+{
+    transition: top 0.3s ease, transform 0.3s ease;
+    -moz-transition: top 0.3s ease , transform 0.3s ease; /* Firefox 4 */
+    -webkit-transition: top 0.5s ease , transform 0.5s ease; /* Safari 和 Chrome */
+    -o-transition: top 0.3s ease, transform 0.3s ease; /* Opera */
+}
+.pullToRefresh img {
+    display:block;
+    width: 30px;
+    height: 30px;
+
+    /* 让img居中在.pullToRefresh中 */
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left:0;
+    right:0;
+    margin:auto;
+
+    transform:rotateZ(0deg);
+    -ms-transform:rotateZ(0deg); 	/* IE 9 */
+    -moz-transform:rotateZ(0deg); 	/* Firefox */
+    -webkit-transform:rotateZ(0deg); /* Safari 和 Chrome */
+    -o-transform:rotateZ(0deg); 	/* Opera */
+}
