@@ -36,13 +36,14 @@ function installPullToRefresh(container, option) {
 
     // 创建小图标
     var pullToRefresh = $('<div class="pullToRefresh"><img src="' + finalOption.pullImg + '"></div>');
+    // 保留小图标的快捷方式
+    var pullImg = pullToRefresh.find("img");
+
     // 添加到父容器
     $(container).prepend(pullToRefresh);
 
     // 调整小图标位置的函数
     function goTowards(translateY, rotate) {
-        // 切换为pull图
-        pullToRefresh.find("img").attr("src", finalOption.pullImg);
         // 更新当前小图标的位置，获取css(transform)比较麻烦,所以每次变更时自己保存
         curY = translateY;
         // 改变位置和旋转角度
@@ -58,6 +59,8 @@ function installPullToRefresh(container, option) {
         // 如果存在,则关闭回弹动画与相关监听
         pullToRefresh.removeClass("backTranTop");
         pullToRefresh.unbind();
+        // 切换为pull图
+        pullImg.attr("src", finalOption.pullImg);
     }).on("touchmove", function (event) {
         var touchCurY = event.originalEvent.changedTouches[0].clientY;
         var touchDistance = touchCurY - touchStartY; // 本次移动的距离
@@ -91,7 +94,7 @@ function installPullToRefresh(container, option) {
                 // 角度恢复为0
                 goTowards(finalOption.pauseBound, 0);
                 // 切换图片为load图
-                pullToRefresh.find("img").attr("src", finalOption.loadImg);
+                pullImg.attr("src", finalOption.loadImg);
                 // 回调加载数据,最终应将loadEvent传回校验
                 finalOption.onLoad(loadEvent, function (userLoadEvent, error, msg) {
                     if (loadEvent === userLoadEvent) { // 在刷新数据期间，没有发起新的触摸
@@ -100,6 +103,8 @@ function installPullToRefresh(container, option) {
                         // 延迟过渡动画,给浏览器重绘的机会
                         setTimeout(function() {
                             if (loadEvent == userLoadEvent) {
+                                // 切换为pull图
+                                pullImg.attr("src", finalOption.pullImg);
                                 // 恢复动画
                                 pullToRefresh.addClass("backTranTop");
                                 // 弹回顶部
