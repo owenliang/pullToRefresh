@@ -10,6 +10,8 @@ function installPullToRefresh(container, option) {
     var pullStartY = 0;
     // 当前的加载事件
     var loadEvent = null;
+    // 当前图标位置
+    var curY = -60;
 
     // 默认参数
     var defaultOption = {
@@ -38,18 +40,19 @@ function installPullToRefresh(container, option) {
     $(container).prepend(pullToRefresh);
 
     // 调整小图标位置的函数
-    function goTowards(top, rotate) {
+    function goTowards(translateY, rotate) {
         // 切换为pull图
         pullToRefresh.find("img").attr("src", finalOption.pullImg);
-
-        pullToRefresh.css("top", top + "px");
-        cssTransform(pullToRefresh, "rotateZ(" + rotate + "deg)");
+        // 更新当前小图标的位置，获取css(transform)比较麻烦,所以每次变更时自己保存
+        curY = translateY;
+        // 改变位置和旋转角度
+        cssTransform(pullToRefresh, "translateY(" + translateY + "px) translateZ(0)" + "rotateZ(" + rotate + "deg)");
     }
 
     // 父容器注册下拉事件
     $(container).on("touchstart", function (event) {
         touchStartY = event.originalEvent.changedTouches[0].clientY;
-        pullStartY = parseInt(pullToRefresh.css("top"));
+        pullStartY = curY;
         // 记录本次加载事件（JS对象唯一性）
         loadEvent = {};
         // 如果存在,则关闭回弹动画与相关监听
@@ -78,42 +81,38 @@ function installPullToRefresh(container, option) {
         // 启动回弹动画
         pullToRefresh.addClass("backTranTop");
         // 判断是否触发加载
-        var curPullY = parseInt(pullToRefresh.css("top"));
-        if (curPullY >= finalOption.pauseBound) {
+        if (curY >= finalOption.pauseBound) {
             goTowards(finalOption.pauseBound, (finalOption.pauseBound / finalOption.lowerBound) * 360);
             // 回弹动画结束发起加载
             pullToRefresh.on('transitionend webkitTransitionEnd oTransitionEnd', function (event) {
-                // 因为一个动画的多个transition会回调多次,所以只判断其中的transition: top
-                if (event.originalEvent.propertyName == "top") {
-                    // 暂停动画
-                    pullToRefresh.removeClass("backTranTop");
-                    pullToRefresh.unbind();
-                    // 角度恢复为0
-                    goTowards(finalOption.pauseBound, 0);
-                    // 切换图片为load图
-                    pullToRefresh.find("img").attr("src", finalOption.loadImg);
-                    // 回调加载数据,最终应将loadEvent传回校验
-                    finalOption.onLoad(loadEvent, function (userLoadEvent, error, msg) {
-                        if (loadEvent === userLoadEvent) { // 在刷新数据期间，没有发起新的触摸
-                            // 重置角度,切换为pull图
-                            goTowards(finalOption.pauseBound, (finalOption.pauseBound / finalOption.lowerBound) * 360);
-                            // 延迟过渡动画,给浏览器重绘的机会
-                            setTimeout(function() {
-                                if (loadEvent == userLoadEvent) {
-                                    // 恢复动画
-                                    pullToRefresh.addClass("backTranTop");
-                                    // 弹回顶部
-                                    goTowards(-60, 0);
-                                } else {
-                                    console.log("loadDone expires before repainted"); // 在等待绘制过渡动画前，重新触摸了屏幕
-                                }
-                            }, 0);
-                            console.log("loadDone done");
-                        } else {
-                            console.log("loadDone expires before data loaded"); // 在刷新数据期间，重新触摸了屏幕
-                        }
-                    });
-                }
+                // 暂停动画
+                pullToRefresh.removeClass("backTranTop");
+                pullToRefresh.unbind();
+                // 角度恢复为0
+                goTowards(finalOption.pauseBound, 0);
+                // 切换图片为load图
+                pullToRefresh.find("img").attr("src", finalOption.loadImg);
+                // 回调加载数据,最终应将loadEvent传回校验
+                finalOption.onLoad(loadEvent, function (userLoadEvent, error, msg) {
+                    if (loadEvent === userLoadEvent) { // 在刷新数据期间，没有发起新的触摸
+                        // 重置角度,切换为pull图
+                        goTowards(finalOption.pauseBound, (finalOption.pauseBound / finalOption.lowerBound) * 360);
+                        // 延迟过渡动画,给浏览器重绘的机会
+                        setTimeout(function() {
+                            if (loadEvent == userLoadEvent) {
+                                // 恢复动画
+                                pullToRefresh.addClass("backTranTop");
+                                // 弹回顶部
+                                goTowards(-60, 0);
+                            } else {
+                                console.log("loadDone expires before repainted"); // 在等待绘制过渡动画前，重新触摸了屏幕
+                            }
+                        }, 0);
+                        console.log("loadDone done");
+                    } else {
+                        console.log("loadDone expires before data loaded"); // 在刷新数据期间，重新触摸了屏幕
+                    }
+                });
             });
         } else {
             goTowards(-60, 0); // 弹回顶部
