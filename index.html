@@ -34,7 +34,9 @@
             // 有的浏览器拖拽会移动页面或者自带下拉刷新功能, 需要为document禁止默认行为
             $(document).on("touchmove", function(event) {
                 event.preventDefault();
-            })
+            }).on("touchstart", function(event) {
+                event.preventDefault();
+            });
 
             // 测试
             installPullToRefresh("#container", {
