@@ -20,13 +20,22 @@
         #container {
             position:relative;
             height:100%;
+            overflow:hidden;
+        }
+        #content {
             overflow:scroll;
+            height:100%;
             background-color:#f1f1f1;
         }
     </style>
 
     <script>
         $(document).ready(function() {
+            // 有的浏览器拖拽会移动页面或者自带下拉刷新功能, 需要为document禁止默认行为
+            $(document).on("touchmove", function(event) {
+                event.preventDefault();
+            })
+
             // 测试
             installPullToRefresh("#container", {
                 onLoad: function(loadEvent, loadDone) {
@@ -40,6 +49,10 @@
 
 </head>
 <body>
-    <div id="container"></div>
+    <div id="container">
+        <div id="content">
+            content goes here
+        </div>
+    </div>
 </body>
 </html>
