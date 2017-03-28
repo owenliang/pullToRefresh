@@ -2,17 +2,22 @@
     position:absolute;
     left:0;
     right:0;
-    top:-60px;
     margin:auto;
     width: 50px;
     height: 50px;
+
+    transform:translateY(-60px) translateZ(0) rotateZ(0deg);
+    -ms-transform:translateY(-60px) translateZ(0) rotateZ(0deg); 	/* IE 9 */
+    -moz-transform:translateY(-60px) translateZ(0) rotateZ(0deg); 	/* Firefox */
+    -webkit-transform:translateY(-60px) translateZ(0) rotateZ(0deg); /* Safari 和 Chrome */
+    -o-transform:translateY(-60px) translateZ(0) rotateZ(0deg); 	/* Opera */
 }
 .backTranTop
 {
-    transition: top 0.3s ease, transform 0.3s ease;
-    -moz-transition: top 0.3s ease , transform 0.3s ease; /* Firefox 4 */
-    -webkit-transition: top 0.5s ease , transform 0.5s ease; /* Safari 和 Chrome */
-    -o-transition: top 0.3s ease, transform 0.3s ease; /* Opera */
+    transition: transform 0.5s ease;
+    -moz-transition: transform 0.5s ease; /* Firefox 4 */
+    -webkit-transition: transform 0.5s ease; /* Safari 和 Chrome */
+    -o-transition: transform 0.5s ease; /* Opera */
 }
 .pullToRefresh img {
     display:block;
@@ -26,10 +31,4 @@
     left:0;
     right:0;
     margin:auto;
-
-    transform:rotateZ(0deg);
-    -ms-transform:rotateZ(0deg); 	/* IE 9 */
-    -moz-transform:rotateZ(0deg); 	/* Firefox */
-    -webkit-transform:rotateZ(0deg); /* Safari 和 Chrome */
-    -o-transform:rotateZ(0deg); 	/* Opera */
 }
