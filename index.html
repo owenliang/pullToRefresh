@@ -40,7 +40,7 @@
             }
 
             // 安装下拉刷新插件
-            var pullToRefresh = installPullToRefresh("#container", "#content", {
+            var pullToRefresh = installPullToRefresh("#container", {
                 onLoad: function(loadDone) {
                     setTimeout(function() {
                         $("#content").append("<p>第" + (i++) + "个元素</p>");
