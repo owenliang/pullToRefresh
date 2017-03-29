@@ -24,6 +24,12 @@
             overflow:hidden;
             background-color:#f1f1f1;
         }
+        .item {
+            height: 80px;
+            border-bottom: 1px solid black;
+            text-align: center;
+            line-height:80px;
+        }
     </style>
 
     <script>
@@ -33,20 +39,30 @@
                 event.preventDefault();
             });
 
+            // 测试用的数据下标
             var i = 0;
-            // 生成测试数据
-            for (; i < 100; ++i) {
-                $("#content").append("<p>第" + i + "个元素</p>");
-            }
 
             // 安装下拉刷新插件
             var pullToRefresh = installPullToRefresh("#container", {
+                onRefresh: function(refreshDone) {
+                    setTimeout(function() {
+                        $("#content").html("");
+                        // 刷新后出现10个
+                        for (i = 0; i < 10; ++i) {
+                            $("#content").append('<p class="item">第' + i + "个元素</p>");
+                        }
+                        refreshDone();
+                    }, 2000)
+                },
                 onLoad: function(loadDone) {
                     setTimeout(function() {
-                        $("#content").append("<p>第" + (i++) + "个元素</p>");
+                        // 每次加载增加5个
+                        for (var j = 0; j < 5; ++j) {
+                            $("#content").append('<p class="item">第' + i++ + "个元素</p>");
+                        }
                         loadDone();
-                    }, 5000)
-                },
+                    }, 0);
+                }
             });
         });
     </script>

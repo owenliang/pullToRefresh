@@ -2,6 +2,8 @@
  * 为容器添加下拉刷新功能
  * @param container 滚动容器，需要设置height与position:relative/absolute，只能有1个孩子
  * @param option 配置项
+ * @description
+ *  2017-03-29 增加了可扩展的上拉加载功能，
  */
 function installPullToRefresh(container, option) {
     // 起始触摸位置
@@ -10,18 +12,33 @@ function installPullToRefresh(container, option) {
     var pullStartY = 0;
     // 当前的触摸事件
     var touchEvent = null;
-    // 当前的加载事件
-    var loadEvent = null;
+    // 当前的刷新事件
+    var refreshEvent = null;
     // 当前图标位置
     var curY = -55;
+    // 当前的加载事件
+    var loadEvent = null;
 
     // 默认参数
     var defaultOption = {
-        pauseBound: 40,  // 触发刷新的位置(也是图标加载时暂停的位置)
+        // 刷新相关
+        pauseBound: 40,  // 触发刷新的位置(也是图标loading暂停的位置)
         lowerBound: 80, // 最大下拉到多少px
-        loadImg: "load.png", // 加载图片
+        loadImg: "load.png", // loading图片
         pullImg: "pull.png", // 下拉图片
-        onLoad: function () {}, // 加载数据回调
+        onRefresh: function (refreshDone) { // 刷新数据回调
+            setTimeout(function() { // 默认不做任何事
+                refreshDone();
+            }, 0);
+        },
+
+        // 加载相关
+        bottomHeight: 1, // 距离滚动条底部多少px发起刷新
+        onLoad: function (loadDone) {
+            setTimeout(function() {
+                loadDone();
+            }, 0);
+        },
     };
     var finalOption = $.extend(true, defaultOption, option);
 
@@ -47,10 +64,32 @@ function installPullToRefresh(container, option) {
     // 小图标容器添加到滚动区域之前
     $(container).before(pullContainer);
 
-    // 初始化iscroll5滚动区域
+    // 创建iscroll5滚动区域
     var iscroll = new IScroll(container, {
         bounce: false,
     });
+    // 监听滚动结束事件,用于上拉加载
+    iscroll.on('scrollEnd', function() {
+        // 有滚动条的情况下,才允许上拉加载
+        if (iscroll.maxScrollY < 0) { // maxScrollY<0表明出现了滚动条
+            var bottomDistance = (iscroll.maxScrollY - iscroll.y) * -1;
+            // 距离底部足够近，触发加载
+            if (bottomDistance <= finalOption.bottomHeight) {
+                // 当前没有刷新和加载事件正在执行
+                if (!loadEvent && !refreshEvent) {
+                    loadEvent = {}; // 生成新的加载事件
+                    finalOption.onLoad(function(error, msg) {
+                        loadEvent = null; // 清理当前的加载事件
+                        // 延迟重绘滚动条
+                        setTimeout(function() {
+                            iscroll.refresh();
+                        }, 0);
+                    });
+                }
+            }
+        }
+    });
+    // 初始化iscroll
     iscroll.refresh();
 
     // 预加载loadImg
@@ -83,7 +122,7 @@ function installPullToRefresh(container, option) {
         // 新的触摸事件
         touchEvent = {};
         // 有一个刷新事件正在进行
-        if (loadEvent) {
+        if (refreshEvent) {
             return;
         }
         // 只有滚动轴位置接近顶部, 才可以生成新的刷新事件
@@ -92,7 +131,7 @@ function installPullToRefresh(container, option) {
         }
 
         // 一个新的刷新事件
-        loadEvent = touchEvent;
+        refreshEvent = touchEvent;
 
         touchStartY = event.originalEvent.changedTouches[0].clientY;
         pullStartY = curY;
@@ -103,7 +142,7 @@ function installPullToRefresh(container, option) {
         pullImg.attr("src", finalOption.pullImg);
     }).on("touchmove", function (event) {
         // 在刷新未完成前触摸,将被忽略
-        if (touchEvent != loadEvent) {
+        if (touchEvent != refreshEvent) {
             return;
         }
         var touchCurY = event.originalEvent.changedTouches[0].clientY;
@@ -121,15 +160,15 @@ function installPullToRefresh(container, option) {
         goTowards(curPullY);
     }).on("touchend", function (event) {
         // 在刷新未完成前触摸,将被忽略
-        if (touchEvent != loadEvent) {
+        if (touchEvent != refreshEvent) {
             return;
         }
         // 启动回弹动画
         pullToRefresh.addClass("backTranTop");
-        // 判断是否触发加载
+        // 判断是否触发刷新
         if (curY >= finalOption.pauseBound) {
             goTowards(finalOption.pauseBound);
-            // 回弹动画结束发起加载
+            // 回弹动画结束发起刷新
             pullToRefresh.on('transitionend webkitTransitionEnd oTransitionEnd', function (event) {
                 // 由于transitionend会对每个属性回调一次,所以只处理其中一个
                 if (event.originalEvent.propertyName == "transform") {
@@ -138,13 +177,13 @@ function installPullToRefresh(container, option) {
                     pullToRefresh.unbind();
                     // 透明度重置为1
                     goTowards(finalOption.pauseBound, undefined, 1);
-                    // 切换图片为load图
+                    // 切换图片为loading图
                     pullImg.attr("src", finalOption.loadImg);
                     // 因为anamition会覆盖transform的原因,使用top临时定位元素
                     pullToRefresh.addClass("loadingAnimation");
                     pullToRefresh.css("top", finalOption.pauseBound + "px");
-                    // 回调加载数据,最终应将loadEvent传回校验
-                    finalOption.onLoad(function (error, msg) {
+                    // 回调刷新数据,最终应将refreshEvent传回校验
+                    finalOption.onRefresh(function (error, msg) {
                         // 用户回调时DOM通常已经更新, 需要通知iscroll调整（官方建议延迟执行，涉及到浏览器重绘问题）
                         setTimeout(function () {
                             iscroll.refresh();
@@ -161,7 +200,7 @@ function installPullToRefresh(container, option) {
                             // 恢复动画
                             pullToRefresh.addClass("backTranTop");
                             // 刷新完成
-                            loadEvent = null;
+                            refreshEvent = null;
                             // 弹回顶部
                             goTowards(-55);
                         }, 100);
@@ -170,7 +209,7 @@ function installPullToRefresh(container, option) {
             });
         } else {
             goTowards(-55); // 弹回顶部
-            loadEvent = null; // 未达成刷新触发条件
+            refreshEvent = null; // 未达成刷新触发条件
         }
     });
 
