@@ -6,6 +6,7 @@
  
 ## 依赖
 * iscroll5：兼容各移动平台的滚动条方案
+* jquery：高效跨平台的DOM操作
 
 ## 实现
 * 基于transition实现bounce回弹动画

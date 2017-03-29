@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="iscroll.js"></script>
     <script src="pullToRefresh.js"></script>
     <link rel='stylesheet' type='text/css' href = 'pullToRefresh.css'>
     <style>
@@ -20,19 +21,31 @@
         #container {
             position:relative;
             height:100%;
-            overflow:scroll;
+            overflow:hidden;
             background-color:#f1f1f1;
         }
     </style>
 
     <script>
         $(document).ready(function() {
-            // 测试
-            installPullToRefresh("#container", {
-                onLoad: function(loadEvent, loadDone) {
+            // 有的浏览器拖拽会移动页面或者自带下拉刷新功能, 需要为document禁止默认行为
+            $(document).on("touchmove", function(event){
+                event.preventDefault();
+            });
+
+            var i = 0;
+            // 生成测试数据
+            for (; i < 100; ++i) {
+                $("#content").append("<p>第" + i + "个元素</p>");
+            }
+
+            // 安装下拉刷新插件
+            var pullToRefresh = installPullToRefresh("#container", "#content", {
+                onLoad: function(loadDone) {
                     setTimeout(function() {
-                        loadDone(loadEvent);
-                    }, 1000)
+                        $("#content").append("<p>第" + (i++) + "个元素</p>");
+                        loadDone();
+                    }, 5000)
                 },
             });
         });
@@ -40,6 +53,8 @@
 
 </head>
 <body>
-    <div id="container"></div>
+    <div id="container">
+        <div id="content"></div>
+    </div>
 </body>
 </html>

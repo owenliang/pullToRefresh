@@ -2,22 +2,32 @@
     position:absolute;
     left:0;
     right:0;
-    top:-60px;
     margin:auto;
     width: 50px;
     height: 50px;
+    z-index: 10;
+    opacity: 1;
+
+    transform:translateY(-55px) translateZ(0) rotateZ(0deg);
+    -ms-transform:translateY(-55px) translateZ(0) rotateZ(0deg); 	/* IE 9 */
+    -moz-transform:translateY(-55px) translateZ(0) rotateZ(0deg); 	/* Firefox */
+    -webkit-transform:translateY(-55px) translateZ(0) rotateZ(0deg); /* Safari 和 Chrome */
+    -o-transform:translateY(-55px) translateZ(0) rotateZ(0deg); 	/* Opera */
 }
 .backTranTop
 {
-    transition: top 0.3s ease, transform 0.3s ease;
-    -moz-transition: top 0.3s ease , transform 0.3s ease; /* Firefox 4 */
-    -webkit-transition: top 0.5s ease , transform 0.5s ease; /* Safari 和 Chrome */
-    -o-transition: top 0.3s ease, transform 0.3s ease; /* Opera */
+    transition: transform 0.8s ease, opacity 0.8s ease;
+    -moz-transition: transform 0.8s ease, opacity 0.8s ease; /* Firefox 4 */
+    -webkit-transition: transform 0.8s ease, opacity 0.8s ease; /* Safari 和 Chrome */
+    -o-transition: transform 0.8s ease, opacity 0.8s ease; /* Opera */
+}
+.pullContainer {
+    position:relative;
 }
 .pullToRefresh img {
     display:block;
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
 
     /* 让img居中在.pullToRefresh中 */
     position: absolute;
@@ -26,10 +36,51 @@
     left:0;
     right:0;
     margin:auto;
+}
+/* loading旋转动画 */
+.loadingAnimation
+{
+    animation: loadingFrame 1s infinite;
+    -moz-animation: loadingFrame 1s infinite;	/* Firefox */
+    -webkit-animation: loadingFrame 1s infinite;	/* Safari 和 Chrome */
+    -o-animation: loadingFrame 1s infinite;	/* Opera */
+}
+@keyframes loadingFrame
+{
+    from {
+        transform: rotateZ(360deg);
+    }
+    to {
+        transform: rotateZ(0deg);
+    }
+}
 
-    transform:rotateZ(0deg);
-    -ms-transform:rotateZ(0deg); 	/* IE 9 */
-    -moz-transform:rotateZ(0deg); 	/* Firefox */
-    -webkit-transform:rotateZ(0deg); /* Safari 和 Chrome */
-    -o-transform:rotateZ(0deg); 	/* Opera */
+@-moz-keyframes loadingFrame /* Firefox */
+{
+    from {
+        transform: rotateZ(360deg);
+    }
+    to {
+        transform: rotateZ(0deg);
+    }
+}
+
+@-webkit-keyframes loadingFrame /* Safari 和 Chrome */
+{
+    from {
+        transform: rotateZ(360deg);
+    }
+    to {
+        transform: rotateZ(0deg);
+    }
+}
+
+@-o-keyframes loadingFrame /* Opera */
+{
+    from {
+        transform: rotateZ(360deg);
+    }
+    to {
+        transform: rotateZ(0deg);
+    }
 }
