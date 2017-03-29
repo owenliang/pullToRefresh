@@ -33,8 +33,9 @@
                 event.preventDefault();
             });
 
+            var i = 0;
             // 生成测试数据
-            for (var i = 0; i < 100; ++i) {
+            for (; i < 100; ++i) {
                 $("#content").append("<p>第" + i + "个元素</p>");
             }
 
@@ -42,8 +43,9 @@
             var pullToRefresh = installPullToRefresh("#container", "#content", {
                 onLoad: function(loadDone) {
                     setTimeout(function() {
+                        $("#content").append("<p>第" + (i++) + "个元素</p>");
                         loadDone();
-                    }, 2000)
+                    }, 5000)
                 },
             });
         });

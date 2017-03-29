@@ -6,6 +6,7 @@
     width: 50px;
     height: 50px;
     z-index: 10;
+    opacity: 1;
 
     transform:translateY(-55px) translateZ(0) rotateZ(0deg);
     -ms-transform:translateY(-55px) translateZ(0) rotateZ(0deg); 	/* IE 9 */
@@ -15,18 +16,18 @@
 }
 .backTranTop
 {
-    transition: transform 0.5s ease;
-    -moz-transition: transform 0.5s ease; /* Firefox 4 */
-    -webkit-transition: transform 0.5s ease; /* Safari 和 Chrome */
-    -o-transition: transform 0.5s ease; /* Opera */
+    transition: transform 0.8s ease, opacity 0.8s ease;
+    -moz-transition: transform 0.8s ease, opacity 0.8s ease; /* Firefox 4 */
+    -webkit-transition: transform 0.8s ease, opacity 0.8s ease; /* Safari 和 Chrome */
+    -o-transition: transform 0.8s ease, opacity 0.8s ease; /* Opera */
 }
 .pullContainer {
     position:relative;
 }
 .pullToRefresh img {
     display:block;
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
 
     /* 让img居中在.pullToRefresh中 */
     position: absolute;
@@ -35,4 +36,51 @@
     left:0;
     right:0;
     margin:auto;
+}
+/* loading旋转动画 */
+.loadingAnimation
+{
+    animation: loadingFrame 1s infinite;
+    -moz-animation: loadingFrame 1s infinite;	/* Firefox */
+    -webkit-animation: loadingFrame 1s infinite;	/* Safari 和 Chrome */
+    -o-animation: loadingFrame 1s infinite;	/* Opera */
+}
+@keyframes loadingFrame
+{
+    from {
+        transform: rotateZ(360deg);
+    }
+    to {
+        transform: rotateZ(0deg);
+    }
+}
+
+@-moz-keyframes loadingFrame /* Firefox */
+{
+    from {
+        transform: rotateZ(360deg);
+    }
+    to {
+        transform: rotateZ(0deg);
+    }
+}
+
+@-webkit-keyframes loadingFrame /* Safari 和 Chrome */
+{
+    from {
+        transform: rotateZ(360deg);
+    }
+    to {
+        transform: rotateZ(0deg);
+    }
+}
+
+@-o-keyframes loadingFrame /* Opera */
+{
+    from {
+        transform: rotateZ(360deg);
+    }
+    to {
+        transform: rotateZ(0deg);
+    }
 }
