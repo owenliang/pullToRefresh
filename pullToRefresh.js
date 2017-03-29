@@ -20,7 +20,7 @@ function installPullToRefresh(container, content, option) {
     var defaultOption = {
         pauseBound: 40,  // 触发刷新的位置(也是图标加载时暂停的位置)
         lowerBound: 80, // 最大下拉到多少px
-        loadImg: "load.gif", // 加载图片
+        loadImg: "load.png", // 加载图片
         pullImg: "pull.png", // 下拉图片
         onLoad: function () {}, // 加载数据回调
     };
@@ -57,12 +57,26 @@ function installPullToRefresh(container, content, option) {
     // 预加载loadImg
     $('<img src="' + finalOption.loadImg + '">');
 
-    // 调整小图标位置的函数
-    function goTowards(translateY, rotate) {
+    // 调整小图标位置,角度,透明度
+    function goTowards(translateY, rotate, opcaticy) {
         // 更新当前小图标的位置，获取css(transform)比较麻烦,所以每次变更时自己保存
         curY = translateY;
+
+        // 旋转图标（根据抵达lowerBound的比例旋转,最大转1圈)
+        if (rotate === undefined) {
+            rotate = (curY / finalOption.lowerBound) * 360;
+        }
+        // 透明度根据抵达pauseBound的比例计算
+        if (opcaticy === undefined) {
+            opcaticy = (curY / finalOption.pauseBound) * 1;
+            if (opcaticy > 1) {
+                opcaticy = 1;
+            }
+        }
         // 改变位置和旋转角度
         cssTransform(pullToRefresh, "translateY(" + translateY + "px) translateZ(0)" + "rotateZ(" + rotate + "deg)");
+        // 改变透明度
+        pullToRefresh.css("opacity", opcaticy);
     }
 
     // 父容器注册下拉事件
@@ -104,13 +118,8 @@ function installPullToRefresh(container, content, option) {
         if (curPullY <= -55) {
             curPullY = -55;
         }
-        var rotateDeg = 0;
-        if (curPullY >= 0) {
-            var pullRate = curPullY / finalOption.lowerBound;
-            rotateDeg = pullRate * 360;
-        }
-        // 更新图标的位置, 旋转图标（根据抵达lowerBound的比例旋转,最大转1圈)
-        goTowards(curPullY, rotateDeg);
+        // 更新图标的位置
+        goTowards(curPullY);
     }).on("touchend", function (event) {
         // 在刷新未完成前触摸,将被忽略
         if (touchEvent != loadEvent) {
@@ -120,39 +129,48 @@ function installPullToRefresh(container, content, option) {
         pullToRefresh.addClass("backTranTop");
         // 判断是否触发加载
         if (curY >= finalOption.pauseBound) {
-            goTowards(finalOption.pauseBound, (finalOption.pauseBound / finalOption.lowerBound) * 360);
+            goTowards(finalOption.pauseBound);
             // 回弹动画结束发起加载
             pullToRefresh.on('transitionend webkitTransitionEnd oTransitionEnd', function (event) {
-                // 暂停动画
-                pullToRefresh.removeClass("backTranTop");
-                pullToRefresh.unbind();
-                // 角度恢复为0
-                goTowards(finalOption.pauseBound, 0);
-                // 切换图片为load图
-                pullImg.attr("src", finalOption.loadImg);
-                // 回调加载数据,最终应将loadEvent传回校验
-                finalOption.onLoad(function (error, msg) {
-                    // 用户回调时DOM通常已经更新, 需要通知iscroll调整（官方建议延迟执行，涉及到浏览器重绘问题）
-                    setTimeout(function() {
-                        iscroll.refresh();
-                    }, 0);
-                    // 重置角度,切换为pull图
-                    goTowards(finalOption.pauseBound, (finalOption.pauseBound / finalOption.lowerBound) * 360);
-                    // 延迟过渡动画100毫秒,给浏览器重绘的机会
-                    setTimeout(function() {
-                        // 切换为pull图
-                        pullImg.attr("src", finalOption.pullImg);
-                        // 恢复动画
-                        pullToRefresh.addClass("backTranTop");
-                        // 刷新完成
-                        loadEvent = null;
-                        // 弹回顶部
-                        goTowards(-55, 0);
-                    }, 100);
-                });
+                // 由于transitionend会对每个属性回调一次,所以只处理其中一个
+                if (event.originalEvent.propertyName == "transform") {
+                    // 暂停动画
+                    pullToRefresh.removeClass("backTranTop");
+                    pullToRefresh.unbind();
+                    // 透明度重置为1
+                    goTowards(finalOption.pauseBound, undefined, 1);
+                    // 切换图片为load图
+                    pullImg.attr("src", finalOption.loadImg);
+                    // 因为anamition会覆盖transform的原因,使用top临时定位元素
+                    pullToRefresh.addClass("loadingAnimation");
+                    pullToRefresh.css("top", finalOption.pauseBound + "px");
+                    // 回调加载数据,最终应将loadEvent传回校验
+                    finalOption.onLoad(function (error, msg) {
+                        // 用户回调时DOM通常已经更新, 需要通知iscroll调整（官方建议延迟执行，涉及到浏览器重绘问题）
+                        setTimeout(function () {
+                            iscroll.refresh();
+                        }, 0);
+                        // 重置角度,切换为pull图
+                        goTowards(finalOption.pauseBound);
+                        // 取消animation,重置top
+                        pullToRefresh.removeClass("loadingAnimation");
+                        pullToRefresh.css("top", "");
+                        // 延迟过渡动画100毫秒,给浏览器重绘的机会
+                        setTimeout(function () {
+                            // 切换为pull图
+                            pullImg.attr("src", finalOption.pullImg);
+                            // 恢复动画
+                            pullToRefresh.addClass("backTranTop");
+                            // 刷新完成
+                            loadEvent = null;
+                            // 弹回顶部
+                            goTowards(-55);
+                        }, 100);
+                    });
+                }
             });
         } else {
-            goTowards(-55, 0); // 弹回顶部
+            goTowards(-55); // 弹回顶部
             loadEvent = null; // 未达成刷新触发条件
         }
     });
