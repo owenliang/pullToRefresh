@@ -1,10 +1,9 @@
 /**
  * 为容器添加下拉刷新功能
  * @param container 滚动容器，需要设置height与position:relative/absolute，只能有1个孩子
- * @param content 滚动内容，cotainer的唯一孩子，内容超过container则产生滚动条
  * @param option 配置项
  */
-function installPullToRefresh(container, content, option) {
+function installPullToRefresh(container, option) {
     // 起始触摸位置
     var touchStartY = 0;
     // 起始图标位置
