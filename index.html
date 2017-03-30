@@ -43,7 +43,7 @@
             var i = 0;
 
             // 安装下拉刷新插件
-            var pullToRefresh = installPullToRefresh("#container", {
+            var pullToRefresh = $.installPullToRefresh("#container", {
                 onRefresh: function(refreshDone) {
                     setTimeout(function() {
                         $("#content").html("");
@@ -62,7 +62,9 @@
                         }
                         loadDone();
                     }, 0);
-                }
+                },
+                // noRefresh: true,
+                // noLoad: true,
             });
         });
     </script>
