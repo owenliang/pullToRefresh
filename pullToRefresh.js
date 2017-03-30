@@ -51,17 +51,6 @@ function (container, option) {
     };
     var finalOption = $.extend(true, defaultOption, option);
 
-    // 设置transform的函数
-    function cssTransform(node, content) {
-        node.css({
-            '-webkit-transform' : content,
-            '-moz-transform'    : content,
-            '-ms-transform'     : content,
-            '-o-transform'      : content,
-            'transform'         : content,
-        });
-    }
-
     // 创建iscroll5滚动区域
     var iscroll = new IScroll(container, {
         bounce: false,
@@ -106,6 +95,17 @@ function (container, option) {
         $(container).before(pullContainer);
         // 预加载loadImg
         $('<img src="' + finalOption.loadImg + '">');
+
+        // 设置transform的函数
+        function cssTransform(node, content) {
+            node.css({
+                '-webkit-transform' : content,
+                '-moz-transform'    : content,
+                '-ms-transform'     : content,
+                '-o-transform'      : content,
+                'transform'         : content,
+            });
+        }
 
         // 调整小图标位置,角度,透明度
         function goTowards(translateY, rotate, opcaticy) {
@@ -227,7 +227,9 @@ function (container, option) {
     }
 
     // 初始化iscroll
-    iscroll.refresh();
+    setTimeout(function() {
+        iscroll.refresh();
+    }, 0);
 
     // 返回操作此区域的工具对象
     return {
