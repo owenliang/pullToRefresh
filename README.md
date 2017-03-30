@@ -1,5 +1,8 @@
 # pullToRefresh
 
+## 效果
+[点击体验](https://owenliang.github.io/pullToRefresh/)
+（选择手机模式）
 ## 说明
 * 完整的功能：同时支持"下拉刷新"，"上拉加载"
 * 简单的接口：用户仅需提供数据回调函数，框架负责剩余任务
@@ -69,3 +72,5 @@
 
 	pullToRefresh.refresh();
 
+## TODO
+* 提供编程接口，用于触发"下拉刷新"，常用于首屏加载。
