@@ -80,7 +80,7 @@ If you have updated the html in "#content" that changes the height of "#content"
 
 	pullToRefresh.refresh();
 
-### Froce refresh
+### Force refresh
 You may need to load data for the first screen in app without user's touch, the following method will trigger a "pull-down-to-refresh" immediately:
 
     pullToRefresh.triggerPull();
