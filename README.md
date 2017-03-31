@@ -1,8 +1,6 @@
 # pullToRefresh 
 
-> ![load your world](logo.png) 
-> Load your world   
-
+![load your world](logo.png) Load Your World   
 
 #Contribute or Issue
 There is 1 new feature to implement, JUST DO IT AND JOIN ME!
@@ -88,8 +86,7 @@ You may need to load data for the first screen in app without user's touch, the 
     
 # pullToRefresh 
 
-> ![加载你的世界](logo.png)
-> 加载你的世界
+![加载你的世界](logo.png)加载你的世界
 
 #贡献与提问
 现在有一个待实现的功能，希望你加入一起搞定！
