@@ -129,52 +129,8 @@ function (container, option) {
             pullToRefresh.css("opacity", opcaticy);
         }
 
-        // 父容器注册下拉事件
-        $(container).on("touchstart", function (event) {
-            // 新的触摸事件
-            touchEvent = {};
-            // 有一个刷新事件正在进行
-            if (refreshEvent) {
-                return;
-            }
-            // 只有滚动轴位置接近顶部, 才可以生成新的刷新事件
-            if (iscroll.y < -1 * finalOption.lowerBound) {
-                return;
-            }
-
-            // 一个新的刷新事件
-            refreshEvent = touchEvent;
-
-            touchStartY = event.originalEvent.changedTouches[0].clientY;
-            pullStartY = curY;
-            // 如果存在,则关闭回弹动画与相关监听
-            pullToRefresh.removeClass("backTranTop");
-            pullToRefresh.unbind();
-            // 切换为pull图
-            pullImg.attr("src", finalOption.pullImg);
-        }).on("touchmove", function (event) {
-            // 在刷新未完成前触摸,将被忽略
-            if (touchEvent != refreshEvent) {
-                return;
-            }
-            var touchCurY = event.originalEvent.changedTouches[0].clientY;
-            var touchDistance = touchCurY - touchStartY; // 本次移动的距离
-            var curPullY = pullStartY + touchDistance; // 计算图标应该移动到的位置
-            // 向下不能拉出范围
-            if (curPullY > finalOption.lowerBound) {
-                curPullY = finalOption.lowerBound;
-            }
-            // 向上不能拉出范围
-            if (curPullY <= -55) {
-                curPullY = -55;
-            }
-            // 更新图标的位置
-            goTowards(curPullY);
-        }).on("touchend", function (event) {
-            // 在刷新未完成前触摸,将被忽略
-            if (touchEvent != refreshEvent) {
-                return;
-            }
+        // 开启回弹动画
+        function tryStartBackTranTop() {
             // 启动回弹动画
             pullToRefresh.addClass("backTranTop");
             // 判断是否触发刷新
@@ -223,6 +179,56 @@ function (container, option) {
                 goTowards(-55); // 弹回顶部
                 refreshEvent = null; // 未达成刷新触发条件
             }
+        }
+
+        // 父容器注册下拉事件
+        $(container).on("touchstart", function (event) {
+            // 新的触摸事件
+            touchEvent = {};
+            // 有一个刷新事件正在进行
+            if (refreshEvent) {
+                return;
+            }
+            // 只有滚动轴位置接近顶部, 才可以生成新的刷新事件
+            if (iscroll.y < -1 * finalOption.lowerBound) {
+                return;
+            }
+
+            // 一个新的刷新事件
+            refreshEvent = touchEvent;
+
+            touchStartY = event.originalEvent.changedTouches[0].clientY;
+            pullStartY = curY;
+            // 如果存在,则关闭回弹动画与相关监听
+            pullToRefresh.removeClass("backTranTop");
+            pullToRefresh.unbind();
+            // 切换为pull图
+            pullImg.attr("src", finalOption.pullImg);
+        }).on("touchmove", function (event) {
+            // 在刷新未完成前触摸,将被忽略
+            if (touchEvent != refreshEvent) {
+                return;
+            }
+            var touchCurY = event.originalEvent.changedTouches[0].clientY;
+            var touchDistance = touchCurY - touchStartY; // 本次移动的距离
+            var curPullY = pullStartY + touchDistance; // 计算图标应该移动到的位置
+            // 向下不能拉出范围
+            if (curPullY > finalOption.lowerBound) {
+                curPullY = finalOption.lowerBound;
+            }
+            // 向上不能拉出范围
+            if (curPullY <= -55) {
+                curPullY = -55;
+            }
+            // 更新图标的位置
+            goTowards(curPullY);
+        }).on("touchend", function (event) {
+            // 在刷新未完成前触摸,将被忽略
+            if (touchEvent != refreshEvent) {
+                return;
+            }
+            // 尝试启动回弹动画
+            tryStartBackTranTop();
         });
     }
 
@@ -239,6 +245,23 @@ function (container, option) {
             setTimeout(function() {
                 iscroll.refresh();
             }, 0);
-        }
+        },
+        // 触发下拉刷新
+        triggerPull: function() {
+            // 正在刷新或者禁止刷新
+            if (refreshEvent || finalOption.noRefresh) {
+                return false;
+            }
+            // 暂停可能正在进行的最终阶段回弹动画
+            pullToRefresh.removeClass("backTranTop");
+            // 小图标移动到lowerbound位置
+            goTowards(finalOption.lowerBound);
+            // 创建新的刷新事件,占坑可以阻止在setTimeout之前的触摸引起刷新
+            refreshEvent = {};
+            // 延迟到浏览器重绘
+            setTimeout(function() {
+                tryStartBackTranTop();
+            }, 100);
+        },
     };
 };
