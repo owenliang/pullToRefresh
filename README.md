@@ -1,7 +1,4 @@
-# pullToRefresh 
-
-![load your world](logo.png) Load Your World   
-
+#pullToRefresh 
 
 #Contribute or Issue
 There is 1 new feature to implement, JUST DO IT AND JOIN ME!
