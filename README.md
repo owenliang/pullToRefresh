@@ -41,6 +41,7 @@
 	* position：relative/absolute/fixed
 	* height：固定高度,才能出现滚动条
 * content容纳内容，必须是container的唯一子元素
+* 注：插件并不会依赖2个div的id属性, 这里仅仅为了演示用途
 
 ### 初始化插件
             // 安装下拉刷新插件
