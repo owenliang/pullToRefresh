@@ -4,7 +4,7 @@
 >load your world
 
 # Contribute or Issue
-There is 1 new feature to implement, JUST DO IT AND JOIN ME!
+There is 1 new feature to implement, JUST DO IT AND JOIN US!
 
 * pack this plugin into a npm package.
 
