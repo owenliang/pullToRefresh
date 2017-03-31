@@ -1,4 +1,4 @@
-#pullToRefresh
+# pullToRefresh
 
 >![load your world](logo.png)
 >load your world
@@ -10,39 +10,39 @@ There is 1 new feature to implement, JUST DO IT AND JOIN ME!
 
 If you have problems with this plugin, then just create an issue, and I will solve it as soon as possible.
 
-#Experience
+# Experience
 [click to experience](https://owenliang.github.io/pullToRefresh/)
 （switch to mobile device in browser）
 
-#Description
+# Description
 * *Complete features*: both support "pull-down-to-refresh" and "pull-up-to-load".
 * *Simple API*: only need to provide your data-callback-function, the plugin will do the left.
 * *Configurable*: you can specific the position where "refresh/load" will be triggered, the images that show up...But the default config already works well.
 * *Flexibility*: "pull-down/pull-up" features can be "open/close" separately, and "pull-up-to-load" anamition can be added by yourself additionaly.
 
-#Dependency
+# Dependency
 * *iscroll5*: high performance, small footprint, dependency free, multi-platform javascript scroller.
 * *jquery*: make it much easier to use JavaScript on your website.
 
-#Implement
+# Implement
 * use "*CSS Transition*" for "bounce animation".
 * use "*CSS Anamation*" for "loading anamation".
 * use IScroll5's "*Scroll Event*" for "pull-up-to-load"
 * assign to jquery as a *Static Function*
 
-#Tested
+# Tested
 * wechat
 * mobile-chrome
 * safari
 
-#Usage
-###Import js and css
+# Usage
+### Import js and css
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
     <script src="iscroll.js"></script>
     <script src="pullToRefresh.js"></script>
     <link rel='stylesheet' type='text/css' href = 'pullToRefresh.css'>
 
-###Prepare Container
+### Prepare Container
 	<div id="container">
 		<div id="content"></div>
 	</div>
@@ -52,7 +52,7 @@ If you have problems with this plugin, then just create an issue, and I will sol
 * content should hold your html, and the scroll-bar will appear when content is higher than container.
 * this plugin doesn't need "id" attribute in container and content, it is just an example here.
 
-###Install plugin
+### Install plugin
             var pullToRefresh = $.installPullToRefresh("#container", {
                 onRefresh: function(refreshDone) {
                     setTimeout(function() {
@@ -75,12 +75,12 @@ If you have problems with this plugin, then just create an issue, and I will sol
 	* *noLoad*：set to true if you do not need "pull-up-to-load" feature.
 	* *other expert-params*: read the pullToRefresh.js to learn more.
 
-###Redraw
+### Redraw
 If you have updated the html in "#content" that changes the height of "#content" outside onRefresh/onLoad callback, you *MUST* do the following, otherwise the iscroll5-bar may occur a drawing error:
 
 	pullToRefresh.refresh();
 
-###Froce refresh
+### Froce refresh
 You may need to load data for the first screen in app without user's touch, the following method will trigger a "pull-down-to-refresh" immediately:
 
     pullToRefresh.triggerPull();
