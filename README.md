@@ -1,7 +1,7 @@
 # pullToRefresh 
 
->![load your world](logo.png)
->Load your world
+> ![load your world](logo.png) 
+> Load your world
 
 #Contribute or Issue
 There is 1 new feature to implement, JUST DO IT AND JOIN ME!
