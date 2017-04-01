@@ -84,7 +84,9 @@ function (container, option) {
     // 关闭下拉刷新特性
     if (!finalOption.noRefresh) {
         // 紧邻滚动区域,容纳刷新图标
-        var pullContainer = $('<div class="pullContainer"></div>')
+        var pullContainer = $('<div class="pullContainer"></div>');
+        // 设置下拉条宽度与容器宽度一致
+        pullContainer.css("width", $(container).css("width"));
         // 创建小图标
         var pullToRefresh = $('<div class="pullToRefresh"><img src="' + finalOption.pullImg + '"></div>');
         // 保留小图标的快捷方式
