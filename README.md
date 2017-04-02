@@ -40,7 +40,6 @@ There is some tricks for IScroll5 codes, all modification listed below:
 
     // NEW FEATURE:
     // user can lock scroll Y for certain direction, used by pull-to-refresh-like scenarios
-    // deltaY = this.hasVerticalScroll ? deltaY : 0;
 	lockScrollUp: function() {
 		this.isScrollUpLocked = true;
 	},
@@ -59,7 +58,6 @@ There is some tricks for IScroll5 codes, all modification listed below:
 
     // NEW FEATURE:
     // user can lock scroll Y for certain direction, used by pull-to-refresh-like scenarios
-    // deltaY = this.hasVerticalScroll ? deltaY : 0;
     deltaY = deltaY < 0 && this.isScrollUpLocked ? 0 : deltaY;
 
     ...
@@ -162,7 +160,6 @@ You may need to load data for the first screen in app without user's touch, the 
 
     // NEW FEATURE:
     // user can lock scroll Y for certain direction, used by pull-to-refresh-like scenarios
-    // deltaY = this.hasVerticalScroll ? deltaY : 0;
 	lockScrollUp: function() {
 		this.isScrollUpLocked = true;
 	},
@@ -181,7 +178,6 @@ You may need to load data for the first screen in app without user's touch, the 
 
     // NEW FEATURE:
     // user can lock scroll Y for certain direction, used by pull-to-refresh-like scenarios
-    // deltaY = this.hasVerticalScroll ? deltaY : 0;
     deltaY = deltaY < 0 && this.isScrollUpLocked ? 0 : deltaY;
 
     ...
