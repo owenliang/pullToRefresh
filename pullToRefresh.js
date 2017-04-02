@@ -13,10 +13,8 @@
  */
 $.installPullToRefresh =
 function (container, option) {
-    // 起始触摸位置
-    var touchStartY = 0;
-    // 起始图标位置
-    var pullStartY = 0;
+    // 上一次移动的位置
+    var touchLastY = null;
     // 当前的触摸事件
     var touchEvent = null;
     // 当前的刷新事件
@@ -191,43 +189,49 @@ function (container, option) {
             if (refreshEvent) {
                 return;
             }
-            // 只有滚动轴位置接近顶部, 才可以生成新的刷新事件
-            if (iscroll.y < -1 * finalOption.lowerBound) {
-                return;
-            }
 
             // 一个新的刷新事件
             refreshEvent = touchEvent;
-
-            touchStartY = event.originalEvent.changedTouches[0].clientY;
-            pullStartY = curY;
+            // 重置下拉启动时的手势位置
+            touchLastY = null;
             // 如果存在,则关闭回弹动画与相关监听
             pullToRefresh.removeClass("backTranTop");
             pullToRefresh.unbind();
             // 切换为pull图
             pullImg.attr("src", finalOption.pullImg);
         }).on("touchmove", function (event) {
+            var touchCurY = event.originalEvent.changedTouches[0].clientY;
+
             // 在刷新未完成前触摸,将被忽略
             if (touchEvent != refreshEvent) {
                 return;
             }
-            var touchCurY = event.originalEvent.changedTouches[0].clientY;
-            var touchDistance = touchCurY - touchStartY; // 本次移动的距离
-            var curPullY = pullStartY + touchDistance; // 计算图标应该移动到的位置
+
+            // 滚动条必须到达顶部,才开始下拉刷新动画
+            if (iscroll.y != 0) {
+                return;
+            } else if (touchLastY === null) {
+                touchLastY = touchCurY; // 下拉启动时的手势位置
+            }
+
+            // 计算与前一次事件之间移动的距离
+            var delta = touchCurY - touchLastY;
+            touchLastY = touchCurY;
+
+            // 图标的目标位置
+            var destY = curY + delta;
             // 向下不能拉出范围
-            if (curPullY > finalOption.lowerBound) {
-                curPullY = finalOption.lowerBound;
+            if (destY > finalOption.lowerBound) {
+                destY = finalOption.lowerBound;
             }
             // 向上不能拉出范围
-            if (curPullY <= -55) {
-                curPullY = -55;
+            if (destY <= -55) {
+                destY = -55;
             }
             // 更新图标的位置
-            goTowards(curPullY);
-            // 一旦移动到刷新点后,向上回拉刷新按钮,后面的滚动条也不跟着动
-            if (curY >= finalOption.pauseBound) {
-                iscroll.lockScrollUp(); // iscroll5锁Y轴滚动
-            }
+            goTowards(destY);
+            // 一旦下拉开始, Y轴向上的滚动条将锁定
+            iscroll.lockScrollUp();
         }).on("touchend", function (event) {
             // 在刷新未完成前触摸,将被忽略
             if (touchEvent != refreshEvent) {
