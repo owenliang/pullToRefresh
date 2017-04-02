@@ -233,6 +233,8 @@ function (container, option) {
             // 一旦小图标进入视野, Y轴向上的滚动条将锁定
             if (destY >= 0) {
                 iscroll.lockScrollUp();
+            } else { // 一旦小图标离开视野, Y轴向上的滚动条释放锁定
+                iscroll.unlockScrollUp();
             }
         }).on("touchend", function (event) {
             // 在刷新未完成前触摸,将被忽略
