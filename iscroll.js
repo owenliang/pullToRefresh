@@ -518,7 +518,6 @@ IScroll.prototype = {
 
     // NEW FEATURE:
     // user can lock scroll Y for certain direction, used by pull-to-refresh-like scenarios
-    // deltaY = this.hasVerticalScroll ? deltaY : 0;
 	lockScrollUp: function() {
 		this.isScrollUpLocked = true;
 	},
@@ -593,7 +592,6 @@ IScroll.prototype = {
 
         // NEW FEATURE:
         // user can lock scroll Y for certain direction, used by pull-to-refresh-like scenarios
-        // deltaY = this.hasVerticalScroll ? deltaY : 0;
 		deltaY = deltaY < 0 && this.isScrollUpLocked ? 0 : deltaY;
 
 		newX = this.x + deltaX;
