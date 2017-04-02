@@ -35,6 +35,39 @@ If you have problems with this plugin, then just create an issue, and I will sol
 * mobile-chrome
 * safari
 
+# WARNING
+There is some tricks for IScroll5 codes, all modification listed below:
+
+    // NEW FEATURE:
+    // user can lock scroll Y for certain direction, used by pull-to-refresh-like scenarios
+    // deltaY = this.hasVerticalScroll ? deltaY : 0;
+	lockScrollUp: function() {
+		this.isScrollUpLocked = true;
+	},
+
+	unlockScrollUp: function() {
+		this.isScrollUpLocked = false;
+	},
+	////////////////////////////////////////
+
+	_move: function (e) {
+
+	...
+
+    deltaX = this.hasHorizontalScroll ? deltaX : 0;
+    deltaY = this.hasVerticalScroll ? deltaY : 0;
+
+    // NEW FEATURE:
+    // user can lock scroll Y for certain direction, used by pull-to-refresh-like scenarios
+    // deltaY = this.hasVerticalScroll ? deltaY : 0;
+    deltaY = deltaY < 0 && this.isScrollUpLocked ? 0 : deltaY;
+
+    ...
+
+* lockScrollUp: is used to prevent iscroll's from scrolling while the user pull up the "pull-down-to-refresh".
+* unlockScrollUp: free the iscroll's scrolling-up lock.
+* _move: if scroll-y direction is up and lockScrollUp is called before, then reset deltaY to ZERO.
+
 # Usage
 ### Import js and css
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
@@ -96,42 +129,75 @@ You may need to load data for the first screen in app without user's touch, the 
  
 如果你对插件使用过程有任何BUG与需求，请创建一个ISSUE，我会尽快回复与解决
 
-## 效果
+# 效果
 [点击体验](https://owenliang.github.io/pullToRefresh/)
 （选择手机模式）
 
-## 说明
+# 说明
 * 完整的功能：同时支持"下拉刷新"，"上拉加载"
 * 简单的接口：用户仅需提供数据回调函数，框架负责剩余任务
 * 参数化配置：用户可自定义"下拉/上拉"的触发位置、图片等，但是默认值通常可以满足需求
 * 灵活的设定："下拉/上拉"特性可独立"开启/关闭","上拉加载"特效交由用户订制
 
-## 依赖
+# 依赖
 * iscroll5：兼容各移动平台的滚动条方案
 * jquery：高效跨平台的DOM操作
 
-## 实现
+# 实现
 * 基于transition实现bounce回弹动画
 * 基于anamation实现自旋loading加载动画
 * 基于iscroll5滚动事件实现"上拉加载"
 * 基于jquery静态函数实现为插件
 
-## 原理
+# 原理
 参考[鱼儿的博客](http://yuerblog.cc)
 
-## 测试
+# 测试
 * 微信浏览器
 * chrome移动浏览器
 * safari浏览器
 
-## 用法
-### 引入文件
+# 注意
+我为IScroll5打了一个小补丁, 所有的修改列举如下：
+
+    // NEW FEATURE:
+    // user can lock scroll Y for certain direction, used by pull-to-refresh-like scenarios
+    // deltaY = this.hasVerticalScroll ? deltaY : 0;
+	lockScrollUp: function() {
+		this.isScrollUpLocked = true;
+	},
+
+	unlockScrollUp: function() {
+		this.isScrollUpLocked = false;
+	},
+	////////////////////////////////////////
+
+	_move: function (e) {
+
+	...
+
+    deltaX = this.hasHorizontalScroll ? deltaX : 0;
+    deltaY = this.hasVerticalScroll ? deltaY : 0;
+
+    // NEW FEATURE:
+    // user can lock scroll Y for certain direction, used by pull-to-refresh-like scenarios
+    // deltaY = this.hasVerticalScroll ? deltaY : 0;
+    deltaY = deltaY < 0 && this.isScrollUpLocked ? 0 : deltaY;
+
+    ...
+
+* lockScrollUp: 当用户下拉刷新并将动画向反方向拉回的时候，阻止IScroll5跟随滚动
+* unlockScrollUp: 解除对IScroll5的Y轴上拉锁定
+* _move: 如果当前正在向上拉动Y轴，并且Y轴上拉已锁定，那么重置本次移动的deltaY为0
+
+# 用法
+## 引入文件
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
     <script src="iscroll.js"></script>
     <script src="pullToRefresh.js"></script>
     <link rel='stylesheet' type='text/css' href = 'pullToRefresh.css'>
 
-### 准备容器
+## 准备容器
 
 	<div id="container">
 		<div id="content"></div>
@@ -143,7 +209,7 @@ You may need to load data for the first screen in app without user's touch, the 
 * content容纳内容，必须是container的唯一子元素
 * 注：插件并不会依赖2个div的id属性, 这里仅仅为了演示用途
 
-### 初始化插件
+## 初始化插件
             // 安装下拉刷新插件
             var pullToRefresh = $.installPullToRefresh("#container", {
                 onRefresh: function(refreshDone) {
@@ -168,12 +234,12 @@ You may need to load data for the first screen in app without user's touch, the 
 	* noLoad：设置为true将禁止上拉加载特性
 	* 其他专家参数通常用不到，你可以阅读源码了解
     
-### 重新绘制
+## 重新绘制
 如果你在onRefresh与onLoad之外更新了content里的内容，影响了其总高度，那么请主动发起如下重绘调用，否则可能导致滚动条绘制错误：
 
 	pullToRefresh.refresh();
 
-### 主动刷新
+## 主动刷新
 app首屏通常需要异步获取数据，因此你可以通过下面的方式主动触发一次刷新，效果和手势滑动触发的刷新一致：
 
     pullToRefresh.triggerPull();
