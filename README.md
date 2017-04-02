@@ -97,6 +97,11 @@ There is some tricks for IScroll5 codes, all modification listed below:
                 },
                 // noRefresh: true,
                 // noLoad: true,
+                // pauseBound: 40,
+                // lowerBound: 80,
+                // loadImg: "load.png",
+                // pullImg: "pull.png",
+                // bottomHeight: 1,
             });
 * *first param*: the javascript dom object or query-string of container.
 * *second param*: the config for plugin:
@@ -104,7 +109,11 @@ There is some tricks for IScroll5 codes, all modification listed below:
 	* *onLoad*: callback when load is triggered, you may do ajax here to append more data to "#content".
 	* *noRefresh*：set to true if you do not need "pull-down-to-refresh" featrue.
 	* *noLoad*：set to true if you do not need "pull-up-to-load" feature.
-	* *other expert-params*: read the pullToRefresh.js to learn more.
+	* *pauseBound*: the height where loading image stays while refreshing.
+	* *lowerBound*: the max height that user can pull down.
+	* *loadImg*: the url of refreshing image.
+	* *pullImg*: the url of pulling image.
+	* *bottomHeight*: the distance from content's bottom when "pull-up-to-load" will be triggered.
 
 ### Redraw
 If you have updated the html in "#content" that changes the height of "#content" outside onRefresh/onLoad callback, you *MUST* do the following, otherwise the iscroll5-bar may occur a drawing error:
@@ -220,15 +229,24 @@ You may need to load data for the first screen in app without user's touch, the 
                 },
                 // noRefresh: true,
                 // noLoad: true,
+                // pauseBound: 40,
+                // lowerBound: 80,
+                // loadImg: "load.png",
+                // pullImg: "pull.png",
+                // bottomHeight: 1,
             });
 
 * 第一个参数：container的节点Jquery选择语法或者dom对象
-* 第二个参数：插件配置，其中核心配置：
-	* onRefresh：刷新回调函数，你应该在此发起ajax请求完整数据并覆盖到content内部，最后调用refreshDone通知插件完成
-	* onLoad：加载回调函数，你应该在此发起ajax请求增量数据并追加到content末尾，最后调用loadDone通知插件完成
-	* noRefresh：设置为true将禁止下拉刷新特性
-	* noLoad：设置为true将禁止上拉加载特性
-	* 其他专家参数通常用不到，你可以阅读源码了解
+* 第二个参数：插件配置，所有内容列举如下：
+	* *onRefresh*：刷新回调函数，你应该在此发起ajax请求完整数据并覆盖到content内部，最后调用refreshDone通知插件完成
+	* *onLoad*：加载回调函数，你应该在此发起ajax请求增量数据并追加到content末尾，最后调用loadDone通知插件完成
+	* *noRefresh*：设置为true将禁止下拉刷新特性
+	* *noLoad*：设置为true将禁止上拉加载特性
+	* *pauseBound*： 刷新数据时loading图标的停留高度
+	* *lowerBound*： 下拉的最大高度
+	* *loadImg*：等待刷新图标的URL
+	* *pullImg*：下拉图标的URL
+	* *bottomHeight*：当距离内容底部小于该距离时触发上拉加载
     
 ## 重新绘制
 如果你在onRefresh与onLoad之外更新了content里的内容，影响了其总高度，那么请主动发起如下重绘调用，否则可能导致滚动条绘制错误：
