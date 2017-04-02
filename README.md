@@ -35,6 +35,39 @@ If you have problems with this plugin, then just create an issue, and I will sol
 * mobile-chrome
 * safari
 
+# WARNING
+There is some tricks for IScroll5 codes, all modification listed below:
+
+    // NEW FEATURE:
+    // user can lock scroll Y for certain direction, used by pull-to-refresh-like scenarios
+    // deltaY = this.hasVerticalScroll ? deltaY : 0;
+	lockScrollUp: function() {
+		this.isScrollUpLocked = true;
+	},
+
+	unlockScrollUp: function() {
+		this.isScrollUpLocked = false;
+	},
+	////////////////////////////////////////
+
+	_move: function (e) {
+
+	...
+
+    deltaX = this.hasHorizontalScroll ? deltaX : 0;
+    deltaY = this.hasVerticalScroll ? deltaY : 0;
+
+    // NEW FEATURE:
+    // user can lock scroll Y for certain direction, used by pull-to-refresh-like scenarios
+    // deltaY = this.hasVerticalScroll ? deltaY : 0;
+    deltaY = deltaY < 0 && this.isScrollUpLocked ? 0 : deltaY;
+
+    ...
+
+* lockScrollUp: is used to prevent iscroll's from scrolling while the user pull up the "pull-down-to-refresh".
+* unlockScrollUp: free the iscroll's scrolling-up lock.
+* _move: if scroll-y direction is up and lockScrollUp is called before, then reset deltaY to ZERO.
+
 # Usage
 ### Import js and css
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
@@ -123,6 +156,39 @@ You may need to load data for the first screen in app without user's touch, the 
 * 微信浏览器
 * chrome移动浏览器
 * safari浏览器
+
+# 注意
+我为IScroll5打了一个小补丁, 所有的修改列举如下：
+
+    // NEW FEATURE:
+    // user can lock scroll Y for certain direction, used by pull-to-refresh-like scenarios
+    // deltaY = this.hasVerticalScroll ? deltaY : 0;
+	lockScrollUp: function() {
+		this.isScrollUpLocked = true;
+	},
+
+	unlockScrollUp: function() {
+		this.isScrollUpLocked = false;
+	},
+	////////////////////////////////////////
+
+	_move: function (e) {
+
+	...
+
+    deltaX = this.hasHorizontalScroll ? deltaX : 0;
+    deltaY = this.hasVerticalScroll ? deltaY : 0;
+
+    // NEW FEATURE:
+    // user can lock scroll Y for certain direction, used by pull-to-refresh-like scenarios
+    // deltaY = this.hasVerticalScroll ? deltaY : 0;
+    deltaY = deltaY < 0 && this.isScrollUpLocked ? 0 : deltaY;
+
+    ...
+
+* lockScrollUp: 当用户下拉刷新并将动画向反方向拉回的时候，阻止IScroll5跟随滚动
+* unlockScrollUp: 解除对IScroll5的Y轴上拉锁定
+* _move: 如果当前正在向上拉动Y轴，并且Y轴上拉已锁定，那么重置本次移动的deltaY为0
 
 ## 用法
 ### 引入文件

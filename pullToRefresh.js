@@ -224,11 +224,19 @@ function (container, option) {
             }
             // 更新图标的位置
             goTowards(curPullY);
+            // 一旦移动到刷新点后,向上回拉刷新按钮,后面的滚动条也不跟着动
+            if (curY >= finalOption.pauseBound) {
+                iscroll.lockScrollUp(); // iscroll5锁Y轴滚动
+            }
         }).on("touchend", function (event) {
             // 在刷新未完成前触摸,将被忽略
             if (touchEvent != refreshEvent) {
                 return;
             }
+
+            // 解锁iscroll向上拉动
+            iscroll.unlockScrollUp();
+
             // 尝试启动回弹动画
             tryStartBackTranTop();
         });
