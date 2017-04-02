@@ -230,8 +230,10 @@ function (container, option) {
             }
             // 更新图标的位置
             goTowards(destY);
-            // 一旦下拉开始, Y轴向上的滚动条将锁定
-            iscroll.lockScrollUp();
+            // 一旦小图标进入视野, Y轴向上的滚动条将锁定
+            if (destY >= 0) {
+                iscroll.lockScrollUp();
+            }
         }).on("touchend", function (event) {
             // 在刷新未完成前触摸,将被忽略
             if (touchEvent != refreshEvent) {
