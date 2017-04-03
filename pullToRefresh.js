@@ -236,7 +236,7 @@ function (container, option) {
             } else { // 一旦小图标离开视野, Y轴向上的滚动条释放锁定
                 iscroll.unlockScrollUp();
             }
-        }).on("touchend", function (event) {
+        }).on("touchend touchcancel", function (event) {
             // 在刷新未完成前触摸,将被忽略
             if (touchEvent != refreshEvent) {
                 return;
