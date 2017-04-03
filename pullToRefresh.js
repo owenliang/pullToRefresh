@@ -13,8 +13,6 @@
  */
 $.installPullToRefresh =
 function (container, option) {
-    // 上一次移动的位置
-    var touchLastY = null;
     // 当前的触摸事件
     var touchEvent = null;
     // 当前的刷新事件
@@ -23,6 +21,8 @@ function (container, option) {
     var curY = -55;
     // 当前的加载事件
     var loadEvent = null;
+    // 正在触屏的手指数量
+    var touchFinger = 0;
 
     // 默认参数
     var defaultOption = {
@@ -181,45 +181,75 @@ function (container, option) {
             }
         }
 
+        // 更新最新的手指集合
+        // 浏览器对changedTouches的实现存在问题, 因此总是使用全量的touches进行比对
+        function compareTouchFingers(event) {
+            var identSet = {};
+            // 将不存在手指的添加到集合中
+            for (var i = 0; i < event.originalEvent.touches.length; ++i) {
+                var touch = event.originalEvent.touches[i];
+                identSet[touch.identifier] = true;
+                if (touchEvent[touch.identifier] === undefined) {
+                    touchEvent[touch.identifier] = null;
+                    ++touchFinger;
+                }
+            }
+            // 将已删除的手指集合清理
+            for (var identifier in touchEvent) {
+                // 浏览器集合中已不存在,删除
+                if (identSet[identifier] === undefined) {
+                    delete(touchEvent[identifier]);
+                    --touchFinger;
+                }
+            }
+        }
+
         // 父容器注册下拉事件
         $(container).on("touchstart", function (event) {
-            // 新的触摸事件
-            touchEvent = {};
-            // 有一个刷新事件正在进行
+            if (!touchEvent) {
+                // 第一根指头触屏, 产生新的触摸事件
+                touchEvent = {};
+            }
+            // 将本次的手指加入到触摸事件集合中
+            compareTouchFingers(event);
+
+            // 刷新事件正在进行,忽略本次触屏
             if (refreshEvent) {
                 return;
             }
 
-            // 一个新的刷新事件
+            // 产生新的刷新事件
             refreshEvent = touchEvent;
-            // 重置下拉启动时的手势位置
-            touchLastY = null;
             // 如果存在,则关闭回弹动画与相关监听
             pullToRefresh.removeClass("backTranTop");
             pullToRefresh.unbind();
             // 切换为pull图
             pullImg.attr("src", finalOption.pullImg);
         }).on("touchmove", function (event) {
-            var touchCurY = event.originalEvent.changedTouches[0].clientY;
-
             // 在刷新未完成前触摸,将被忽略
             if (touchEvent != refreshEvent) {
                 return;
             }
 
             // 滚动条必须到达顶部,才开始下拉刷新动画
+            var maxDelta = 0;
             if (iscroll.y != 0) {
                 return;
-            } else if (touchLastY === null) {
-                touchLastY = touchCurY; // 下拉启动时的手势位置
+            } else { // 计算每个变化的手指, 取变化最大的delta
+                for (var i = 0; i < event.originalEvent.changedTouches.length; ++i) {
+                    var fingerTouch = event.originalEvent.changedTouches[i];
+                    if (touchEvent[fingerTouch.identifier] !== null) {
+                        var delta = fingerTouch.clientY - touchEvent[fingerTouch.identifier];
+                        if (Math.abs(delta) > Math.abs(maxDelta)) {
+                            maxDelta = delta;
+                        }
+                    }
+                    touchEvent[fingerTouch.identifier] = fingerTouch.clientY;
+                }
             }
 
-            // 计算与前一次事件之间移动的距离
-            var delta = touchCurY - touchLastY;
-            touchLastY = touchCurY;
-
             // 图标的目标位置
-            var destY = curY + delta;
+            var destY = curY + maxDelta;
             // 向下不能拉出范围
             if (destY > finalOption.lowerBound) {
                 destY = finalOption.lowerBound;
@@ -237,8 +267,23 @@ function (container, option) {
                 iscroll.unlockScrollUp();
             }
         }).on("touchend touchcancel", function (event) {
+            // 从touchEvent移除手指对应的记录
+            compareTouchFingers(event);
+
+            var touchEventRef = touchEvent;
+
+            // 所有手指都离开, 则当前触摸事件结束
+            if (!touchFinger) {
+                touchEvent = null;
+            }
+
             // 在刷新未完成前触摸,将被忽略
-            if (touchEvent != refreshEvent) {
+            if (touchEventRef != refreshEvent) {
+                return;
+            }
+
+            // 只有所有手指都离开后, 才开始刷新动作
+            if (touchFinger) {
                 return;
             }
 

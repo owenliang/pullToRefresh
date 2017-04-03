@@ -19,6 +19,7 @@ If you have problems with this plugin, then just create an issue, and I will sol
 * *Simple API*: only need to provide your data-callback-function, the plugin will do the left.
 * *Configurable*: you can specific the position where "refresh/load" will be triggered, the images that show up...But the default config already works well.
 * *Flexibility*: "pull-down/pull-up" features can be "open/close" separately, and "pull-up-to-load" anamition can be added by yourself additionaly.
+* *Experience*: in line with user's operating habits, strongly support multi-touch.
 
 # Dependency
 * *iscroll5*: high performance, small footprint, dependency free, multi-platform javascript scroller.
@@ -145,6 +146,7 @@ You may need to load data for the first screen in app without user's touch, the 
 * 简单的接口：用户仅需提供数据回调函数，框架负责剩余任务
 * 参数化配置：用户可自定义"下拉/上拉"的触发位置、图片等，但是默认值通常可以满足需求
 * 灵活的设定："下拉/上拉"特性可独立"开启/关闭","上拉加载"特效交由用户订制
+* 良好的体验：拖拽行为符合用户习惯，支持强大的多点触摸
 
 # 依赖
 * iscroll5：兼容各移动平台的滚动条方案
