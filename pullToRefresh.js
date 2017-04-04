@@ -231,21 +231,22 @@ function (container, option) {
                 return;
             }
 
-            // 滚动条必须到达顶部,才开始下拉刷新动画
+            // 计算每个变化的手指, 取变化最大的delta
             var maxDelta = 0;
+            for (var i = 0; i < event.originalEvent.changedTouches.length; ++i) {
+                var fingerTouch = event.originalEvent.changedTouches[i];
+                if (touchEvent[fingerTouch.identifier] !== null) {
+                    var delta = fingerTouch.clientY - touchEvent[fingerTouch.identifier];
+                    if (Math.abs(delta) > Math.abs(maxDelta)) {
+                        maxDelta = delta;
+                    }
+                }
+                touchEvent[fingerTouch.identifier] = fingerTouch.clientY;
+            }
+
+            // 滚动条必须到达顶部,才开始下拉刷新动画
             if (iscroll.y != 0) {
                 return;
-            } else { // 计算每个变化的手指, 取变化最大的delta
-                for (var i = 0; i < event.originalEvent.changedTouches.length; ++i) {
-                    var fingerTouch = event.originalEvent.changedTouches[i];
-                    if (touchEvent[fingerTouch.identifier] !== null) {
-                        var delta = fingerTouch.clientY - touchEvent[fingerTouch.identifier];
-                        if (Math.abs(delta) > Math.abs(maxDelta)) {
-                            maxDelta = delta;
-                        }
-                    }
-                    touchEvent[fingerTouch.identifier] = fingerTouch.clientY;
-                }
             }
 
             // 图标的目标位置
