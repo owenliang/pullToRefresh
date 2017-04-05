@@ -171,6 +171,8 @@ function (container, option) {
                                 refreshEvent = null;
                                 // 弹回顶部
                                 goTowards(-55);
+                                // 滚动条回顶部
+                                iscroll.scrollTo(0, 0, 0);
                             }, 100);
                         });
                     }
