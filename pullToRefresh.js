@@ -318,6 +318,8 @@ function (container, option) {
             if (refreshEvent || finalOption.noRefresh) {
                 return false;
             }
+            // 滚动到顶部
+            iscroll.scrollTo(0, 0, 0);
             // 暂停可能正在进行的最终阶段回弹动画
             pullToRefresh.removeClass("backTranTop");
             // 小图标移动到lowerbound位置
