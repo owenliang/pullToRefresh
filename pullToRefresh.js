@@ -188,8 +188,8 @@ function (container, option) {
         function compareTouchFingers(event) {
             var identSet = {};
             // 将不存在手指的添加到集合中
-            for (var i = 0; i < event.originalEvent.touches.length; ++i) {
-                var touch = event.originalEvent.touches[i];
+            for (var i = 0; i < event.originalEvent.targetTouches.length; ++i) {
+                var touch = event.originalEvent.targetTouches[i];
                 identSet[touch.identifier] = true;
                 if (touchEvent[touch.identifier] === undefined) {
                     touchEvent[touch.identifier] = null;
@@ -237,13 +237,15 @@ function (container, option) {
             var maxDelta = 0;
             for (var i = 0; i < event.originalEvent.changedTouches.length; ++i) {
                 var fingerTouch = event.originalEvent.changedTouches[i];
-                if (touchEvent[fingerTouch.identifier] !== null) {
-                    var delta = fingerTouch.clientY - touchEvent[fingerTouch.identifier];
-                    if (Math.abs(delta) > Math.abs(maxDelta)) {
-                        maxDelta = delta;
+                if (touchEvent[fingerTouch.identifier] !== undefined) { // 只处理目标元素上的手指
+                    if (touchEvent[fingerTouch.identifier] !== null) { // 手指首次移动,不计算delta
+                        var delta = fingerTouch.clientY - touchEvent[fingerTouch.identifier];
+                        if (Math.abs(delta) > Math.abs(maxDelta)) {
+                            maxDelta = delta;
+                        }
                     }
+                    touchEvent[fingerTouch.identifier] = fingerTouch.clientY;
                 }
-                touchEvent[fingerTouch.identifier] = fingerTouch.clientY;
             }
 
             // 滚动条必须到达顶部,才开始下拉刷新动画
