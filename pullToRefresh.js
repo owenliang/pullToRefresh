@@ -13,16 +13,20 @@
  */
 $.installPullToRefresh =
 function (container, option) {
-    // 当前的触摸事件
-    var touchEvent = null;
-    // 当前的刷新事件
-    var refreshEvent = null;
-    // 当前图标位置
-    var curY = -55;
+    // 触摸容器的手指集合
+    var touchFingers = {};
+    // 集合大小
+    var fingerCount = 0;
+
+    // 触摸事件的唯一ID
+    var touchEventID = 0;
+    // 刷新事件的唯一ID
+    var refreshEventID = 0;
     // 当前的加载事件
     var loadEvent = null;
-    // 正在触屏的手指数量
-    var touchFinger = 0;
+
+    // 当前图标位置
+    var curY = -55;
 
     // 默认参数
     var defaultOption = {
@@ -64,7 +68,7 @@ function (container, option) {
                 // 距离底部足够近，触发加载
                 if (bottomDistance <= finalOption.bottomHeight) {
                     // 当前没有刷新和加载事件正在执行
-                    if (!loadEvent && !refreshEvent) {
+                    if (!loadEvent && !refreshEventID) {
                         loadEvent = {}; // 生成新的加载事件
                         finalOption.onLoad(function (error, msg) {
                             loadEvent = null; // 清理当前的加载事件
@@ -150,7 +154,7 @@ function (container, option) {
                         // 因为anamition会覆盖transform的原因,使用top临时定位元素
                         pullToRefresh.addClass("loadingAnimation");
                         pullToRefresh.css("top", finalOption.pauseBound + "px");
-                        // 回调刷新数据,最终应将refreshEvent传回校验
+                        // 回调刷新数据,等待用户回调
                         finalOption.onRefresh(function (error, msg) {
                             // 用户回调时DOM通常已经更新, 需要通知iscroll调整（官方建议延迟执行，涉及到浏览器重绘问题）
                             setTimeout(function () {
@@ -168,7 +172,7 @@ function (container, option) {
                                 // 恢复动画
                                 pullToRefresh.addClass("backTranTop");
                                 // 刷新完成
-                                refreshEvent = null;
+                                refreshEventID = 0;
                                 // 弹回顶部
                                 goTowards(-55);
                                 // 滚动条回顶部
@@ -179,7 +183,7 @@ function (container, option) {
                 });
             } else {
                 goTowards(-55); // 弹回顶部
-                refreshEvent = null; // 未达成刷新触发条件
+                refreshEventID = 0; // 未达成刷新触发条件
             }
         }
 
@@ -188,113 +192,93 @@ function (container, option) {
         function compareTouchFingers(event) {
             var identSet = {};
             // 将不存在手指的添加到集合中
-            for (var i = 0; i < event.originalEvent.touches.length; ++i) {
-                var touch = event.originalEvent.touches[i];
+            for (var i = 0; i < event.originalEvent.targetTouches.length; ++i) {
+                var touch = event.originalEvent.targetTouches[i];
                 identSet[touch.identifier] = true;
-                if (touchEvent[touch.identifier] === undefined) {
-                    touchEvent[touch.identifier] = null;
-                    ++touchFinger;
+                if (touchFingers[touch.identifier] === undefined) {
+                    touchFingers[touch.identifier] = null;
+                    ++fingerCount;
                 }
             }
             // 将已删除的手指集合清理
-            for (var identifier in touchEvent) {
+            for (var identifier in touchFingers) {
                 // 浏览器集合中已不存在,删除
                 if (identSet[identifier] === undefined) {
-                    delete(touchEvent[identifier]);
-                    --touchFinger;
+                    delete(touchFingers[identifier]);
+                    --fingerCount;
                 }
             }
         }
 
-        // 父容器注册下拉事件
-        $(container).on("touchstart", function (event) {
-            if (!touchEvent) {
-                // 第一根指头触屏, 产生新的触摸事件
-                touchEvent = {};
-            }
-            // 将本次的手指加入到触摸事件集合中
+
+        // 统一处理
+        $(container).on("touchstart touchmove touchend touchcancel", function(event) {
+            var beforeFingerCount = fingerCount;
             compareTouchFingers(event);
 
-            // 刷新事件正在进行,忽略本次触屏
-            if (refreshEvent) {
-                return;
-            }
+            if (!beforeFingerCount && fingerCount) { // 开始触摸
+                ++touchEventID; // 新建触摸事件
+                if (!refreshEventID) {
+                    // 新建翻页事件
+                    refreshEventID = touchEventID;
+                    // 如果存在,则关闭回弹动画与相关监听
+                    pullToRefresh.removeClass("backTranTop");
+                    pullToRefresh.unbind();
+                    // 切换为pull图
+                    pullImg.attr("src", finalOption.pullImg);
+                }
+            } else if (beforeFingerCount && !fingerCount) { // 结束触摸
+                if (touchEventID != refreshEventID) { // 在前一个刷新未完成前进行了触摸,将被忽略
+                    return;
+                }
+                // 解锁iscroll向上拉动
+                iscroll.unlockScrollUp();
 
-            // 产生新的刷新事件
-            refreshEvent = touchEvent;
-            // 如果存在,则关闭回弹动画与相关监听
-            pullToRefresh.removeClass("backTranTop");
-            pullToRefresh.unbind();
-            // 切换为pull图
-            pullImg.attr("src", finalOption.pullImg);
-        }).on("touchmove", function (event) {
-            // 在刷新未完成前触摸,将被忽略
-            if (touchEvent != refreshEvent) {
-                return;
-            }
-
-            // 计算每个变化的手指, 取变化最大的delta
-            var maxDelta = 0;
-            for (var i = 0; i < event.originalEvent.changedTouches.length; ++i) {
-                var fingerTouch = event.originalEvent.changedTouches[i];
-                if (touchEvent[fingerTouch.identifier] !== null) {
-                    var delta = fingerTouch.clientY - touchEvent[fingerTouch.identifier];
-                    if (Math.abs(delta) > Math.abs(maxDelta)) {
-                        maxDelta = delta;
+                // 尝试启动回弹动画
+                tryStartBackTranTop();
+            } else if (beforeFingerCount) { // 正在触摸
+                // 计算每个变化的手指, 取变化最大的delta
+                var maxDelta = 0;
+                for (var i = 0; i < event.originalEvent.changedTouches.length; ++i) {
+                    var fingerTouch = event.originalEvent.changedTouches[i];
+                    if (touchFingers[fingerTouch.identifier] !== undefined) {
+                        if (touchFingers[fingerTouch.identifier] !== null) {
+                            var delta = fingerTouch.clientY - touchFingers[fingerTouch.identifier];
+                            if (Math.abs(delta) > Math.abs(maxDelta)) {
+                                maxDelta = delta;
+                            }
+                        }
+                        touchFingers[fingerTouch.identifier] = fingerTouch.clientY;
                     }
                 }
-                touchEvent[fingerTouch.identifier] = fingerTouch.clientY;
-            }
+                if (touchEventID != refreshEventID) {
+                    return;
+                }
 
-            // 滚动条必须到达顶部,才开始下拉刷新动画
-            if (iscroll.y != 0) {
-                return;
-            }
+                // 滚动条必须到达顶部,才开始下拉刷新动画
+                if (iscroll.y != 0) {
+                    return;
+                }
 
-            // 图标的目标位置
-            var destY = curY + maxDelta;
-            // 向下不能拉出范围
-            if (destY > finalOption.lowerBound) {
-                destY = finalOption.lowerBound;
+                // 图标的目标位置
+                var destY = curY + maxDelta;
+                // 向下不能拉出范围
+                if (destY > finalOption.lowerBound) {
+                    destY = finalOption.lowerBound;
+                }
+                // 向上不能拉出范围
+                if (destY <= -55) {
+                    destY = -55;
+                }
+                // 更新图标的位置
+                goTowards(destY);
+                // 一旦小图标进入视野, Y轴向上的滚动条将锁定
+                if (destY >= 0) {
+                    iscroll.lockScrollUp();
+                } else { // 一旦小图标离开视野, Y轴向上的滚动条释放锁定
+                    iscroll.unlockScrollUp();
+                }
             }
-            // 向上不能拉出范围
-            if (destY <= -55) {
-                destY = -55;
-            }
-            // 更新图标的位置
-            goTowards(destY);
-            // 一旦小图标进入视野, Y轴向上的滚动条将锁定
-            if (destY >= 0) {
-                iscroll.lockScrollUp();
-            } else { // 一旦小图标离开视野, Y轴向上的滚动条释放锁定
-                iscroll.unlockScrollUp();
-            }
-        }).on("touchend touchcancel", function (event) {
-            // 从touchEvent移除手指对应的记录
-            compareTouchFingers(event);
-
-            var touchEventRef = touchEvent;
-
-            // 所有手指都离开, 则当前触摸事件结束
-            if (!touchFinger) {
-                touchEvent = null;
-            }
-
-            // 在刷新未完成前触摸,将被忽略
-            if (touchEventRef != refreshEvent) {
-                return;
-            }
-
-            // 只有所有手指都离开后, 才开始刷新动作
-            if (touchFinger) {
-                return;
-            }
-
-            // 解锁iscroll向上拉动
-            iscroll.unlockScrollUp();
-
-            // 尝试启动回弹动画
-            tryStartBackTranTop();
         });
     }
 
@@ -315,7 +299,7 @@ function (container, option) {
         // 触发下拉刷新
         triggerPull: function() {
             // 正在刷新或者禁止刷新
-            if (refreshEvent || finalOption.noRefresh) {
+            if (refreshEventID || finalOption.noRefresh) {
                 return false;
             }
             // 滚动到顶部
@@ -325,7 +309,7 @@ function (container, option) {
             // 小图标移动到lowerbound位置
             goTowards(finalOption.lowerBound);
             // 创建新的刷新事件,占坑可以阻止在setTimeout之前的触摸引起刷新
-            refreshEvent = {};
+            refreshEventID = -1; // 负值可以忽略任何触摸事件,直到刷新完成
             // 延迟到浏览器重绘
             setTimeout(function() {
                 tryStartBackTranTop();
