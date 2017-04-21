@@ -205,7 +205,8 @@ function (container, option) {
         // 浏览器对changedTouches的实现存在问题, 因此总是使用全量的touches进行比对
         function compareTouchFingers(event) {
             var identSet = {};
-            // 将不存在手指的添加到集合中
+
+            // 添加target内新出现的手指
             for (var i = 0; i < event.originalEvent.targetTouches.length; ++i) {
                 var touch = event.originalEvent.targetTouches[i];
                 identSet[touch.identifier] = true;
@@ -214,10 +215,10 @@ function (container, option) {
                     ++fingerCount;
                 }
             }
-            // 将已删除的手指集合清理
+            // 将target内消失的手指移除
             for (var identifier in touchFingers) {
-                // 浏览器集合中已不存在,删除
-                if (identSet[identifier] === undefined) {
+                // 与本次touchevent属于同一个target,但是touchevent中已消失的手指,需要移除
+                if (identSet[identifier] === undefined && touchFingers[identifier].target === event.originalEvent.target) {
                     delete(touchFingers[identifier]);
                     --fingerCount;
                 }
