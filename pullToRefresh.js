@@ -58,6 +58,18 @@ function (container, option) {
         bounce: false,
     });
 
+    // XXX: touch event will lose after target is deleted, so check after user's DOM operation
+    function handleRemovedTarget() {
+        for (var identifier in touchFingers) {
+            var finger = touchFingers[identifier];
+            if (!$.contains($(container).get(0), finger.target)) {
+                // touch target has been removed, so clear it
+                delete touchFingers[identifier];
+                --fingerCount;
+            }
+        }
+    }
+
     // 关闭上拉加载特性
     if (!finalOption.noLoad) {
         // 监听滚动结束事件,用于上拉加载
@@ -72,6 +84,7 @@ function (container, option) {
                         loadEvent = {}; // 生成新的加载事件
                         finalOption.onLoad(function (error, msg) {
                             loadEvent = null; // 清理当前的加载事件
+                            handleRemovedTarget();
                             // 延迟重绘滚动条
                             setTimeout(function () {
                                 iscroll.refresh();
@@ -160,6 +173,7 @@ function (container, option) {
                             setTimeout(function () {
                                 iscroll.refresh();
                             }, 0);
+                            handleRemovedTarget();
                             // 重置角度,切换为pull图
                             goTowards(finalOption.pauseBound);
                             // 取消animation,重置top
@@ -196,7 +210,7 @@ function (container, option) {
                 var touch = event.originalEvent.targetTouches[i];
                 identSet[touch.identifier] = true;
                 if (touchFingers[touch.identifier] === undefined) {
-                    touchFingers[touch.identifier] = null;
+                    touchFingers[touch.identifier] = { clientY: touch.clientY, target: touch.target};
                     ++fingerCount;
                 }
             }
@@ -209,7 +223,6 @@ function (container, option) {
                 }
             }
         }
-
 
         // 统一处理
         $(container).on("touchstart touchmove touchend touchcancel", function(event) {
@@ -242,13 +255,11 @@ function (container, option) {
                 for (var i = 0; i < event.originalEvent.changedTouches.length; ++i) {
                     var fingerTouch = event.originalEvent.changedTouches[i];
                     if (touchFingers[fingerTouch.identifier] !== undefined) {
-                        if (touchFingers[fingerTouch.identifier] !== null) {
-                            var delta = fingerTouch.clientY - touchFingers[fingerTouch.identifier];
-                            if (Math.abs(delta) > Math.abs(maxDelta)) {
-                                maxDelta = delta;
-                            }
+                        var delta = fingerTouch.clientY - touchFingers[fingerTouch.identifier].clientY;
+                        if (Math.abs(delta) > Math.abs(maxDelta)) {
+                            maxDelta = delta;
                         }
-                        touchFingers[fingerTouch.identifier] = fingerTouch.clientY;
+                        touchFingers[fingerTouch.identifier].clientY = fingerTouch.clientY;
                     }
                 }
                 if (touchEventID != refreshEventID) {
@@ -294,6 +305,7 @@ function (container, option) {
             // 延迟以便配合浏览器重绘
             setTimeout(function() {
                 iscroll.refresh();
+                handleRemovedTarget();
             }, 0);
         },
         // 触发下拉刷新
